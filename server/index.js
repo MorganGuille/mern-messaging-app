@@ -27,8 +27,10 @@ async function connecting() {
 }
 connecting()
 
+app.use("/auth", require("./routes/auth"))
+
 io.on('connection', (socket) => {
-    console.log('A user connected');
+    console.log(socket.id, 'A user connected');
 
     socket.on('disconnect', () => {
         console.log('User disconnected');
