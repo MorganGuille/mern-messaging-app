@@ -17,6 +17,7 @@ function SignUpScreen({ navigation }) {
             const res = await axios.post(`${URL}/signup`, { username, password });
             setResponse(res.data.message)
             console.log(res.data.message)
+            navigation.navigate('Login')
             // navigation.goBack();
         } catch (error) {
             console.error('Signup error:', error);
@@ -29,6 +30,7 @@ function SignUpScreen({ navigation }) {
             <TextInput placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry style={styles.input} />
             <Button title="Signup" onPress={HandleSignUp} />
             <Text>:{response}</Text>
+            <Button title="Go to login" onPress={() => navigation.navigate('Login')}></Button>
         </View>
     )
 }
