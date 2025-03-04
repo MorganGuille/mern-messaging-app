@@ -3,7 +3,10 @@ import { StyleSheet, Text, View, TextInput, Button } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import io from 'socket.io-client';
 
-const socket = io('http://192.168.1.41:5000');
+const socket = io('http://192.168.1.40:5000');
+
+
+
 
 const getToken = async () => {
     try {
@@ -18,13 +21,20 @@ const getToken = async () => {
 
 function ChatScreen() {
 
+
+
+    const [userName, setUserName] = useState('')
     const [content, setContent] = useState('');
     const [receivedMessages, setReceivedMessages] = useState([]);
-    const [sentMessages, setSentMessages] = useState([])
 
-    const retrieveMessages = async () => {
+    useEffect(() => {
+        const getID = async () => {
+            let userName = await AsyncStorage.getItem('username');
+            setUserName(userName)
+        }
+        getID()
+    }, []);
 
-    }
 
     useEffect(() => {
         socket.on('receiveMessage', (message) => {
@@ -36,17 +46,14 @@ function ChatScreen() {
 
     const sendMessage = () => {
 
-        let senderID = AsyncStorage.getItem('userID');
-        console.log(senderID) //// this doesnt work at all!
 
         if (content) {
 
             let message = {
-                senderID: senderID,
+                senderID: userName,
                 content: content
             }
-            setSentMessages((prevMessages) => [...prevMessages, message]);
-            console.log('sending', content)
+
             socket.emit('sendMessage', message);
             setContent('');
         }
@@ -55,10 +62,7 @@ function ChatScreen() {
     return (
         <View style={styles.container}>
             {receivedMessages.map((message, index) => (
-                <Text style={styles.recmsgText} key={index}>{message.content}</Text>
-            ))}
-            {sentMessages.map((message, index) => (
-                <Text style={styles.sntmsgText} key={index}>{message.content}</Text>
+                <Text style={message.senderID === userName ? styles.sntmsgText : styles.recmsgText} key={index}>{message.content}</Text>
             ))}
             <TextInput
                 style={styles.input}
@@ -66,17 +70,20 @@ function ChatScreen() {
                 onChangeText={setContent}
                 placeholder="Type a message..."
             />
-            <Button title="Send" onPress={sendMessage} />
-            <Button title="Get token" onPress={getToken} />
+            <View style={styles.btnCont}>
+                <Button title="Send" onPress={sendMessage} />
+                {/* <Button title="Get token" onPress={getToken} /> */}
+            </View>
         </View>
     )
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, justifyContent: 'center', padding: 20 },
-    input: { height: 40, borderColor: 'gray', borderWidth: 1, marginBottom: 10 },
-    recmsgText: { textAlign: 'left', marginBottom: '5', paddingLeft: '10', borderStyle: 'solid', borderColor: 'grey', borderWidth: 1 },
+    container: { flex: 1, justifyContent: 'flex-end', padding: 20, backgroundColor: '##E6E6E6' },
+    input: { textAlign: 'center', borderColor: ' slategrey', borderWidth: 1, marginTop: 5, marginBottom: 5, borderRadius: 50, height: 50 },
+    recmsgText: { height: 50, textAlign: 'left', marginBottom: '5', paddingLeft: '10', borderStyle: 'solid', borderColor: 'grey', borderWidth: 1 },
     sntmsgText: { textAlign: 'right', marginBottom: '5', paddingRight: '10', borderStyle: 'solid', borderColor: 'green', borderWidth: 1, backgroundColor: 'lightgreen' },
+    btnCont: { gap: 10 }
 });
 
 export default ChatScreen
