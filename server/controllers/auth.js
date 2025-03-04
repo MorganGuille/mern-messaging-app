@@ -1,4 +1,5 @@
 const Users = require('../models/users')
+const jwt = require('jsonwebtoken');
 
 const Signup = async (req, res) => {
     console.log(req.body)
@@ -30,18 +31,19 @@ const checkPassword = (pswToCheck, DBPsw) => { //// this is a temp stand in
 
 const Login = async (req, res) => {
 
-    console.log('accessed login function')
-
     try {
         const user = await Users.findOne({ username: req.body.username });
-
 
         if (!user) {
             return res.status(400).send({ message: 'Invalid username' });
         }
 
         if (checkPassword(req.body.password, user.password)) {
-            return res.send({ ok: true, message: `Password for user ${user.username} is correct` })
+
+            const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+            return res.send({ ok: true, message: `Password for user ${user.username} is correct`, token: token, userID: user._id })
+
         } else {
             return res.send({ ok: false, message: `Password for user ${user.username} is incorrect` })
         }

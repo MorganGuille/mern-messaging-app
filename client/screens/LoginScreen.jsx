@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, Button } from 'react-native';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const URL = 'http://192.168.1.41:5000/auth'
 
@@ -14,6 +15,8 @@ function LoginScreen({ navigation }) {
         console.log('handling login')
         try {
             const res = await axios.post(`${URL}/login`, { username, password });
+            await AsyncStorage.setItem('token', res.data.token);
+            await AsyncStorage.setItem('userID', res.data.userID);
             setResponse(res.data.message)
             console.log(res.data.message)
             navigation.navigate('Chat')
