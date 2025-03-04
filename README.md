@@ -1,0 +1,1 @@
+A group chat app made during the Barcelona Code School boot camp. Created with React Native and Expo. I used Express for the back end along with Sockets.io for the chat functionality. This was an opportunity to learn more about Socket.io
