@@ -5,27 +5,22 @@ import io from 'socket.io-client';
 
 const socket = io('http://192.168.1.40:5000');
 
-
-
-
-const getToken = async () => {
-    try {
-        const token = await AsyncStorage.getItem('token');
-        console.log('token:', token)
-        return token;
-    } catch (error) {
-        console.error('Error retrieving token:', error);
-        return null;
-    }
-};
+// const getToken = async () => {
+//     try {
+//         const token = await AsyncStorage.getItem('token');
+//         console.log('token:', token)
+//         return token;
+//     } catch (error) {
+//         console.error('Error retrieving token:', error);
+//         return null;
+//     }
+// };
 
 function ChatScreen() {
 
-
-
     const [userName, setUserName] = useState('')
     const [content, setContent] = useState('');
-    const [receivedMessages, setReceivedMessages] = useState([]);
+    const [messages, setMessages] = useState([]);
 
     useEffect(() => {
         const getID = async () => {
@@ -35,17 +30,15 @@ function ChatScreen() {
         getID()
     }, []);
 
-
     useEffect(() => {
-        socket.on('receiveMessage', (message) => {
-            setReceivedMessages((prevMessages) => [...prevMessages, message]);
+        socket.on('receiveMessage', (dbmessages) => {
+            setMessages(dbmessages);
         });
 
         return () => socket.off('receiveMessage');
     }, []);
 
     const sendMessage = () => {
-
 
         if (content) {
 
@@ -61,7 +54,7 @@ function ChatScreen() {
 
     return (
         <View style={styles.container}>
-            {receivedMessages.map((message, index) => (
+            {messages.map((message, index) => (
                 <Text style={message.senderID === userName ? styles.sntmsgText : styles.recmsgText} key={index}>{message.content}</Text>
             ))}
             <TextInput

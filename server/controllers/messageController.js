@@ -1,10 +1,21 @@
 const socketIo = require('socket.io');
+const Messages = require('../models/message')
 
 let io;
 
-exports.initSocket = (server) => {
+const addMsgToDB = async (message) => {
+    const addMsg = await Messages.create(message)
+    console.log('message added :', addMsg)
+}
 
-    console.log('calling initSocket')
+const dbMessages = async () => {
+
+    let dbmessages = await Messages.find()
+    io.emit('receiveMessage', dbmessages)
+
+}
+
+exports.initSocket = (server) => {
 
     io = socketIo(server, {
         cors: {
@@ -14,7 +25,10 @@ exports.initSocket = (server) => {
     });
 
     io.on('connection', (socket) => {
-        console.log(socket.id, 'A user connected');
+
+        console.log('A user connected');
+
+        dbMessages()
 
         socket.on('disconnect', () => {
             console.log('User disconnected');
@@ -22,10 +36,8 @@ exports.initSocket = (server) => {
 
         socket.on('sendMessage', (message) => {
 
-            console.log('Message received:', message.content);
-            // console.log('senderID:', message.senderID);
-
-            io.emit('receiveMessage', message); // Broadcast to all connected clients
+            addMsgToDB(message)
+            dbMessages()
         });
     });
 };
