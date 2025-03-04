@@ -11,7 +11,7 @@ const addMsgToDB = async (message) => {
 const dbMessages = async () => {
 
     let dbmessages = await Messages.find()
-    io.emit('receiveMessage', dbmessages)
+    io.emit('receiveMessages', dbmessages)
 
 }
 
@@ -39,5 +39,9 @@ exports.initSocket = (server) => {
             addMsgToDB(message)
             dbMessages()
         });
+
+        socket.on('refresh', () => {
+            dbMessages()
+        })
     });
 };
